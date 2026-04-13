@@ -275,8 +275,29 @@ def rerank(
     - Muốn chắc chắn chỉ 3-5 chunk tốt nhất vào prompt
     """
     # TODO Sprint 3: Implement rerank
+    # Chọn Option A — Cross-encoder:
+    # from sentence_transformers import CrossEncoder
+    # model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+    # pairs = [[query, chunk["text"]] for chunk in candidates]
+    # scores = model.predict(pairs)
+    # ranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)
+    # return [chunk for chunk, _ in ranked[:top_k]]
+
+    # Chọn Option B — Rerank bằng LLM (đơn giản hơn nhưng tốn token):
+    prompt = f"""Given the query: '{query}'
+And the following candidate chunks retrieved from the document collection:
+{chr(10).join(f'[{i+1}] {chunk["text"]}' for i, chunk in enumerate(candidates))}
+"""
+    prompt += f"""Please select the top {top_k} most relevant chunks that best answer the query.
+Respond with the list of chunk numbers (e.g., [1, 3, 5]) that are most relevant."""
+    response = call_llm(prompt)
+    selected_indices = parse_response(response)  # TODO: implement parse_response để lấy số thứ tự từ LLM
+    return [candidates[i-1] for i in selected_indices]
+    #print("[rerank] Chưa implement — fallback về dense")
+    # Fallback về dense
+
     # Tạm thời trả về top_k đầu tiên (không rerank)
-    return candidates[:top_k]
+    # return candidates[:top_k]
 
 
 # =============================================================================
@@ -310,6 +331,28 @@ def transform_query(query: str, strategy: str = "expansion") -> List[str]:
     - HyDE: query mơ hồ, search theo nghĩa không hiệu quả
     """
     # TODO Sprint 3: Implement query transformation
+    # Chọn Option A — Expansion:
+    prompt = f"""Given the query: '{query}'.
+    Generate 2-3 alternative phrasings or related terms in Vietnamese.
+    Output as JSON array of strings."""
+    response = call_llm(prompt)
+    transformed_queries = parse_response(response)  # TODO: implement parse_response để lấy list query
+    return transformed_queries
+
+    # Chọn Option B — Decomposition:
+    prompt = f"""Break down this complex query into 2-3 simpler sub-queries: '{query}'
+    Output as JSON array."""
+    response = call_llm(prompt)
+    transformed_queries = parse_response(response)
+    return transformed_queries
+
+    # Chọn Option C — HyDE:
+    prompt = f"""Given the vague query: '{query}'
+    Generate a hypothetical answer as if you had access to the documents.
+    This answer should contain key terms that would help retrieve relevant chunks."""
+    response = call_llm(prompt)
+    transformed_queries = parse_response(response)
+    return transformed_queries
     # Tạm thời trả về query gốc
     return [query]
 
