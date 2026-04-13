@@ -1,14 +1,14 @@
-# Scorecard: variant_hybrid
-Generated: 2026-04-13 16:17
+# Scorecard: rerank_dense
+Generated: 2026-04-13 16:24
 
 ## Summary
 
 | Metric | Average Score |
 |--------|--------------|
-| Faithfulness | 4.40/5 |
-| Relevance | 4.30/5 |
-| Context Recall | 5.00/5 |
-| Completeness | 3.40/5 |
+| Faithfulness | 5.00/5 |
+| Relevance | 3.90/5 |
+| Context Recall | 4.60/5 |
+| Completeness | 4.00/5 |
 
 ## Per-Question Results
 
@@ -17,10 +17,10 @@ Generated: 2026-04-13 16:17
 | q01 | SLA | 5 | 5 | 5 | 5 | The answer accurately reflects the information pro |
 | q02 | Refund | 5 | 5 | 5 | 5 | The answer is directly derived from the provided c |
 | q03 | Access Control | 5 | 5 | 5 | 5 | The answer accurately reflects the requirements fo |
-| q04 | Refund | 5 | 5 | 5 | 3 | The answer accurately reflects the conditions outl |
+| q04 | Refund | 5 | 2 | 1 | 1 | Correctly abstained on empty context. |
 | q05 | IT Helpdesk | 5 | 5 | 5 | 5 | The answer is directly derived from the provided c |
-| q06 | SLA | 5 | 5 | 5 | 1 | The answer is completely grounded in the provided  |
-| q07 | Access Control | 3 | 5 | 5 | 2 | The answer references the document that outlines t |
+| q06 | SLA | 5 | 5 | 5 | 4 | The answer accurately reflects the information pro |
+| q07 | Access Control | 5 | 4 | 5 | 5 | The answer is directly derived from the provided c |
 | q08 | HR Policy | 5 | 5 | 5 | 5 | The answer is completely grounded in the provided  |
-| q09 | Insufficient Context | 1 | 1 | 5 | 1 | The answer 'Tôi không biết' does not provide any i |
-| q10 | Refund | 5 | 2 | 5 | 2 | The answer accurately reflects the provided contex |
+| q09 | Insufficient Context | 5 | 1 | 5 | 3 | Correctly abstained on empty context. |
+| q10 | Refund | 5 | 2 | 5 | 2 | The answer correctly identifies that there is no s |
