@@ -527,16 +527,31 @@ def build_grounded_prompt(query: str, context_block: str) -> str:
     - Thêm ngôn ngữ phản hồi (tiếng Việt vs tiếng Anh)
     - Điều chỉnh tone phù hợp với use case (CS helpdesk, IT support)
     """
-    prompt = f"""Answer only from the retrieved context below.
-If the context is insufficient to answer the question, say you do not know and do not make up information.
-Cite the source field (in brackets like [1]) when possible.
-Keep your answer short, clear, and factual.
-Respond in the same language as the question.
+#     prompt = f"""Answer only from the retrieved context below.
+# If the context is insufficient to answer the question, say you do not know and do not make up information.
+# Cite the source field (in brackets like [1]) when possible.
+# Keep your answer short, clear, and factual.
+# Respond in the same language as the question.
 
-Question: {query}
+# Question: {query}
+
+# Context:
+# {context_block}
+
+# Answer:"""
+    prompt = f"""You are a precise technical support assistant. Answer the user's question using ONLY the provided context.
+
+STRICT RULES:
+1. EVIDENCE-ONLY: Only use information from the retrieved context. Do not use external knowledge or invent facts.
+2. ABSTAIN: If the context is insufficient, especially if specific error codes (like {query}) or procedures are missing, state: "Không tìm thấy thông tin về '{query}' trong tài liệu hiện có."
+3. CITATION: Every factual claim must be followed by its source ID in brackets, e.g., [1].
+4. STYLE: Be factual, short, and clear.
+5. LANGUAGE: Respond in the same language as the question (Vietnamese).
 
 Context:
 {context_block}
+
+Question: {query}
 
 Answer:"""
     return prompt
