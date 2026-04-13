@@ -29,6 +29,7 @@ from typing import List
 from functools import lru_cache
 from sentence_transformers import CrossEncoder
 
+
 load_dotenv()
 
 # =============================================================================
@@ -97,6 +98,15 @@ def retrieve_dense(query: str, top_k: int = TOP_K_SEARCH) -> List[Dict[str, Any]
     """
     import chromadb
     from index import get_embedding, CHROMA_DB_DIR
+<<<<<<< HEAD
+    client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
+    collection = client.get_collection("rag_lab")
+
+    # Embed query bằng cùng model đã dùng khi index (xem index.py)
+    query_embedding = get_embedding(query)
+
+    # Query ChromaDB với embedding đó
+=======
 
     try:
         client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
@@ -111,11 +121,29 @@ def retrieve_dense(query: str, top_k: int = TOP_K_SEARCH) -> List[Dict[str, Any]
         print("[retrieve_dense] get_embedding() is not implemented in index.py yet!")
         return []
         
+>>>>>>> 64497ddb5a924cb54c7ab445dce705013d4a1a86
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=top_k,
         include=["documents", "metadatas", "distances"]
     )
+<<<<<<< HEAD
+    # Trả về kết quả kèm score
+    chunks = []
+    for i, doc in enumerate(results["documents"][0]):
+        metadata = results["metadatas"][0][i]
+        distance = results["distances"][0][i]
+        chunks.append({
+            "text": doc,
+            "metadata": metadata,
+            "score": 1 - distance,
+        })
+    return chunks
+    # raise NotImplementedError(
+    #     "TODO Sprint 2: Implement retrieve_dense().\n"
+    #     "Tham khảo comment trong hàm để biết cách query ChromaDB."
+    # )
+=======
     
     chunks = []
     
@@ -137,6 +165,7 @@ def retrieve_dense(query: str, top_k: int = TOP_K_SEARCH) -> List[Dict[str, Any]
         })
         
     return chunks
+>>>>>>> 64497ddb5a924cb54c7ab445dce705013d4a1a86
 
 
 # =============================================================================
@@ -166,6 +195,42 @@ def retrieve_sparse(query: str, top_k: int = TOP_K_SEARCH) -> List[Dict[str, Any
         scores = bm25.get_scores(tokenized_query)
         top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
     """
+<<<<<<< HEAD
+    # Cài rank_bm25
+    from rank_bm25 import BM25Okapi
+    from index import CHROMA_DB_DIR
+    import chromadb
+    client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
+    collection = client.get_collection("rag_lab")
+
+    # Load tất cả chunks từ ChromaDB (hoặc rebuild từ docs)
+    all_chunks = []
+    for doc in collection.get()["documents"]:
+        all_chunks.extend(doc)
+        
+    # Tokenize và tạo BM25Index
+    corpus = [chunk["text"] for chunk in all_chunks]
+    tokenized_corpus = [doc.lower().split() for doc in corpus]
+    bm25 = BM25Okapi(tokenized_corpus)
+    tokenized_query = query.lower().split()
+    scores = bm25.get_scores(tokenized_query)
+    top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
+
+    # TODO Sprint 3: Implement BM25 search
+    # Trả về top_k kết quả dưới dạng list of dict với "text", "metadata", "score"
+    results = []
+    for i in top_indices:
+        chunk = all_chunks[i]
+        results.append({
+            "text": chunk["text"],
+            "metadata": chunk["metadata"],
+            "score": scores[i],
+        })
+    return results
+    # Tạm thời return empty list
+    # print("[retrieve_sparse] Chưa implement — Sprint 3")
+    # return []
+=======
     import chromadb
     from rank_bm25 import BM25Okapi
     from index import CHROMA_DB_DIR
@@ -208,6 +273,7 @@ def retrieve_sparse(query: str, top_k: int = TOP_K_SEARCH) -> List[Dict[str, Any
             })
 
     return chunks
+>>>>>>> 64497ddb5a924cb54c7ab445dce705013d4a1a86
 
 
 # =============================================================================
@@ -243,6 +309,41 @@ def retrieve_hybrid(
     - Corpus có cả câu tự nhiên VÀ tên riêng, mã lỗi, điều khoản
     - Query như "Approval Matrix" khi doc đổi tên thành "Access Control SOP"
     """
+<<<<<<< HEAD
+    # Chạy retrieve_dense() → dense_results
+    retrieve_dense_results = retrieve_dense(query, top_k)
+
+    # Chạy retrieve_sparse() → sparse_results
+    retrieve_sparse_results = retrieve_sparse(query, top_k)
+
+    # TODO: Implement RRF để merge dense và sparse results
+    # Merge bằng RRF: 60 là hằng số RRF tiêu chuẩn
+    RRF_scores = {}
+    for rank, chunk in enumerate(retrieve_dense_results, 1):
+        RRF_scores[chunk["text"]] = dense_weight / (60 + rank)
+    for rank, chunk in enumerate(retrieve_sparse_results, 1):
+        RRF_scores[chunk["text"]] = sparse_weight / (60 + rank) + RRF_scores.get(chunk["text"], 0)
+
+    # Sort theo RRF score giảm dần, trả về top_k
+    ranked_chunks = sorted(RRF_scores.items(), key=lambda x: x[1], reverse=True)
+    top_chunks = []
+    for chunk, score in ranked_chunks[:top_k]:
+        # Tìm metadata tương ứng từ dense hoặc sparse results
+        metadata = next((c["metadata"] for c in retrieve_dense_results if c["text"] == chunk), None)
+        if not metadata:
+            metadata = next((c["metadata"] for c in retrieve_sparse_results if c["text"] == chunk), None)
+        top_chunks.append({
+            "text": chunk,
+            "metadata": metadata,
+            "score": score,
+        })
+    return top_chunks
+
+    # TODO Sprint 3: Implement hybrid RRF
+    # Tạm thời fallback về dense
+    # print("[retrieve_hybrid] Chưa implement RRF — fallback về dense")
+    # return retrieve_dense(query, top_k)
+=======
     # 1. & 2. Lấy kết quả từ Dense và Sparse (nên lấy đủ lớn để giao thoa RRF hiệu quả)
     pool_size = max(60, top_k * 2)
     dense_results = retrieve_dense(query, top_k=pool_size)
@@ -276,6 +377,7 @@ def retrieve_hybrid(
         final_chunks.append(c)
 
     return final_chunks
+>>>>>>> 64497ddb5a924cb54c7ab445dce705013d4a1a86
 
 
 # =============================================================================
