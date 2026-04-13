@@ -284,15 +284,15 @@ def rerank(
     # return [chunk for chunk, _ in ranked[:top_k]]
 
     # Chọn Option B — Rerank bằng LLM (đơn giản hơn nhưng tốn token):
-    prompt = f"""Given the query: '{query}'
-And the following candidate chunks retrieved from the document collection:
-{chr(10).join(f'[{i+1}] {chunk["text"]}' for i, chunk in enumerate(candidates))}
-"""
-    prompt += f"""Please select the top {top_k} most relevant chunks that best answer the query.
-Respond with the list of chunk numbers (e.g., [1, 3, 5]) that are most relevant."""
-    response = call_llm(prompt)
-    selected_indices = parse_response(response)  # TODO: implement parse_response để lấy số thứ tự từ LLM
-    return [candidates[i-1] for i in selected_indices]
+#     prompt = f"""Given the query: '{query}'
+# And the following candidate chunks retrieved from the document collection:
+# {chr(10).join(f'[{i+1}] {chunk["text"]}' for i, chunk in enumerate(candidates))}
+# """
+#     prompt += f"""Please select the top {top_k} most relevant chunks that best answer the query.
+# Respond with the list of chunk numbers (e.g., [1, 3, 5]) that are most relevant."""
+#     response = call_llm(prompt)
+#     selected_indices = parse_response(response)  # TODO: implement parse_response để lấy số thứ tự từ LLM
+#     return [candidates[i-1] for i in selected_indices]
     #print("[rerank] Chưa implement — fallback về dense")
     # Fallback về dense
 
@@ -332,29 +332,29 @@ def transform_query(query: str, strategy: str = "expansion") -> List[str]:
     """
     # TODO Sprint 3: Implement query transformation
     # Chọn Option A — Expansion:
-    prompt = f"""Given the query: '{query}'.
-    Generate 2-3 alternative phrasings or related terms in Vietnamese.
-    Output as JSON array of strings."""
-    response = call_llm(prompt)
-    transformed_queries = parse_response(response)  # TODO: implement parse_response để lấy list query
-    return transformed_queries
+    # prompt = f"""Given the query: '{query}'.
+    # Generate 2-3 alternative phrasings or related terms in Vietnamese.
+    # Output as JSON array of strings."""
+    # response = call_llm(prompt)
+    # transformed_queries = parse_response(response)  # TODO: implement parse_response để lấy list query
+    # return transformed_queries
 
     # Chọn Option B — Decomposition:
-    prompt = f"""Break down this complex query into 2-3 simpler sub-queries: '{query}'
-    Output as JSON array."""
-    response = call_llm(prompt)
-    transformed_queries = parse_response(response)
-    return transformed_queries
+    # prompt = f"""Break down this complex query into 2-3 simpler sub-queries: '{query}'
+    # Output as JSON array."""
+    # response = call_llm(prompt)
+    # transformed_queries = parse_response(response)
+    # return transformed_queries
 
     # Chọn Option C — HyDE:
-    prompt = f"""Given the vague query: '{query}'
-    Generate a hypothetical answer as if you had access to the documents.
-    This answer should contain key terms that would help retrieve relevant chunks."""
-    response = call_llm(prompt)
-    transformed_queries = parse_response(response)
-    return transformed_queries
-    # Tạm thời trả về query gốc
-    return [query]
+    # prompt = f"""Given the vague query: '{query}'
+    # Generate a hypothetical answer as if you had access to the documents.
+    # This answer should contain key terms that would help retrieve relevant chunks."""
+    # response = call_llm(prompt)
+    # transformed_queries = parse_response(response)
+    # return transformed_queries
+    # # Tạm thời trả về query gốc
+    # return [query]
 
 
 # =============================================================================
@@ -403,7 +403,7 @@ def build_grounded_prompt(query: str, context_block: str) -> str:
     - Điều chỉnh tone phù hợp với use case (CS helpdesk, IT support)
     """
     prompt = f"""Answer only from the retrieved context below.
-If the context is insufficient to answer the question, say you do not know and do not make up information.
+If the context is insufficient to answer the question, especially for specific codes or identifiers like '{query}', explicitly state that the information is not found in the existing documentation. Do not make up or infer information based on general knowledge.
 Cite the source field (in brackets like [1]) when possible.
 Keep your answer short, clear, and factual.
 Respond in the same language as the question.
@@ -414,6 +414,9 @@ Context:
 {context_block}
 
 Answer:"""
+    # format_instruction = "Return the answer in Markdown format with bold keywords for readability."
+    # prompt = format_instruction + "\n\n" + prompt
+    
     return prompt
 
 
@@ -444,6 +447,18 @@ def call_llm(prompt: str) -> str:
 
     Lưu ý: Dùng temperature=0 hoặc thấp để output ổn định cho evaluation.
     """
+    "TODO Sprint 2: Implement call_llm().\n"
+    # Chọn Option A — OpenAI (cần OPENAI_API_KEY):
+    from openai import OpenAI
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    response = client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0,     # temperature=0 để output ổn định, dễ đánh giá
+        max_tokens=512,
+    )
+    return response.choices[0].message.content
+
     raise NotImplementedError(
         "TODO Sprint 2: Implement call_llm().\n"
         "Chọn Option A (OpenAI) hoặc Option B (Gemini) trong TODO comment."
