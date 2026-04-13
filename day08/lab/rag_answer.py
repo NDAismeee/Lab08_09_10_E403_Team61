@@ -40,6 +40,21 @@ TOP_K_SELECT = 3     # Số chunk gửi vào prompt sau rerank/select (top-3 swe
 
 LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")
 
+RERANK_MODEL_NAME = os.getenv(
+    "RERANK_MODEL_NAME",
+    "cross-encoder/ms-marco-MiniLM-L-6-v2"
+)
+RERANK_DEVICE = os.getenv("RERANK_DEVICE", "cpu")
+
+
+@lru_cache(maxsize=1)
+def _get_rerank_model() -> CrossEncoder:
+    return CrossEncoder(
+        RERANK_MODEL_NAME,
+        device=RERANK_DEVICE,
+        max_length=512,
+    )
+
 
 # =============================================================================
 # RETRIEVAL — DENSE (Vector Search)
@@ -286,36 +301,52 @@ def rerank(
         Mỗi chunk giữ nguyên cấu trúc cũ và được bổ sung:
           - "rerank_score": điểm cross-encoder
     """
-    if not candidates:
-        return []
-
-    if top_k <= 0:
+    if not candidates or top_k <= 0:
         return []
 
     try:
         model = _get_rerank_model()
 
-        # Tạo cặp [query, chunk_text] để model chấm relevance
-        pairs = [
-            [query, chunk.get("text", "")]
-            for chunk in candidates
-        ]
+        # Giới hạn top_k không vượt quá số lượng candidates thực tế
+        top_k = min(top_k, len(candidates))
 
-        scores = model.predict(pairs)
+        # Chuẩn hóa text đầu vào cho reranker
+        prepared_candidates = []
+        pairs = []
+
+        for chunk in candidates:
+            text = str(chunk.get("text", "")).strip()
+            # Cắt mềm để giảm tải CPU; cross-encoder vẫn sẽ tokenize/truncate tiếp
+            if len(text) > 2000:
+                text = text[:2000]
+
+            prepared_candidates.append(chunk)
+            pairs.append([query.strip(), text])
+
+        if not pairs:
+            return candidates[:top_k]
+
+        scores = model.predict(
+            pairs,
+            batch_size=8,
+            show_progress_bar=False,
+        )
 
         reranked = []
-        for chunk, score in zip(candidates, scores):
-            new_chunk = dict(chunk)  # tránh sửa trực tiếp object gốc
+        for chunk, score in zip(prepared_candidates, scores):
+            new_chunk = chunk.copy()
             new_chunk["rerank_score"] = float(score)
             reranked.append(new_chunk)
 
-        reranked.sort(key=lambda x: x["rerank_score"], reverse=True)
+        reranked.sort(
+            key=lambda x: x.get("rerank_score", float("-inf")),
+            reverse=True,
+        )
 
-        return reranked[:min(top_k, len(reranked))]
+        return reranked[:top_k]
 
     except Exception as e:
-        print(f"[rerank] Lỗi khi rerank bằng CrossEncoder: {e}")
-        # Fallback an toàn: giữ nguyên top_k đầu tiên
+        print(f"[rerank] CrossEncoder failed, fallback to first {top_k} candidates: {e}")
         return candidates[:top_k]
 
 
