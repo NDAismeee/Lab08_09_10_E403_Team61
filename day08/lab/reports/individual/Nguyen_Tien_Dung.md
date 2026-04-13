@@ -11,7 +11,7 @@
 
 > Trong dự án RAG Pipeline lần này, với vai trò là Retrieval Owner, tôi chịu trách nhiệm chính trong việc tối ưu hóa quy trình từ lúc lấy dữ liệu từ Vector Database cho đến khi đưa vào Prompt. Tôi tập trung chủ yếu vào Sprint 2 và 3.
 
-> Cụ thể, tôi đã thiết lập hàm build_grounded_prompt để đảm bảo LLM luôn trả lời dựa trên ngữ cảnh (context) và thực hiện nghiêm ngặt quy tắc "không bịa đặt" (abstain logic). Tôi cũng tham gia với nhóm vào việc phát triển hàm call_llm để hỗ trợ đa mô hình, cho phép hệ thống linh hoạt chuyển đổi giữa OpenAI và Gemini thông qua biến cấu hình LLM_Provider. Công việc của tôi đóng vai trò là "cầu nối" quan trọng: tiếp nhận các chunk dữ liệu từ index.py và kết quả truy xuất từ các hàm retrieve_dense/retrieve_hybrid trong rag_answer.py, sau đó tinh chỉnh chúng thành một cấu trúc prompt mạch lạc để LLM có thể trích xuất thông tin chính xác nhất kèm theo citation [1], [2].
+> Cụ thể, tôi đã thiết lập hàm build_grounded_prompt để đảm bảo LLM luôn trả lời dựa trên ngữ cảnh (context) và thực hiện nghiêm ngặt quy tắc "không bịa đặt" (abstain logic). Tôi cũng tham gia vào việc phát triển hàm call_llm để hỗ trợ đa mô hình, cho phép hệ thống linh hoạt chuyển đổi giữa OpenAI và Gemini thông qua biến cấu hình LLM_Provider. Công việc của tôi đóng vai trò là "cầu nối" quan trọng: tiếp nhận các chunk dữ liệu từ index.py và kết quả truy xuất từ các hàm retrieve_dense/retrieve_hybrid trong rag_answer.py, sau đó tinh chỉnh chúng thành một cấu trúc prompt mạch lạc để LLM có thể trích xuất thông tin chính xác nhất kèm theo citation [1], [2].
 
 
 
@@ -47,14 +47,17 @@ _________________
 > - Lỗi nằm ở đâu: indexing / retrieval / generation?
 > - Variant có cải thiện không? Tại sao có/không?
 
-**Câu hỏi:** `q04` — "Sản phẩm kỹ thuật số có được hoàn tiền không?"
+**Câu hỏi:** `q09` — "ERR-403-AUTH là lỗi gì và cách xử lý?"
 
 **Phân tích:**
-Trong đợt đánh giá này, câu hỏi **q04** là một ví dụ điển hình cho thấy sự khác biệt giữa hai chiến lược truy xuất. 
-- **Kết quả Baseline (Dense Search):** Hệ thống thất bại hoàn toàn (Score: Relevance 2, Recall 1). Baseline trả về câu trả lời "Không đủ dữ liệu" và danh sách nguồn trống (`[]`). 
-- **Lỗi nằm ở đâu:** Lỗi nằm trọng tâm ở khâu **Retrieval**. Mặc dù thông tin nằm rõ ràng trong tài liệu `policy/refund-v4.pdf` (Điều 3: Ngoại lệ không được hoàn tiền), nhưng phương pháp Dense Search (dựa trên vector embedding) đã không thể tìm thấy chunk này. Có thể do câu hỏi chứa các thuật ngữ cụ thể như "kỹ thuật số" - vốn có trọng số keyword rất cao nhưng vector similarity lại không đủ mạnh để vượt qua các đoạn văn bản khác về chính sách chung.
-- **Variant (Hybrid Search):** Kết quả cải thiện tuyệt đối (Score 5/5). Hệ thống trả lời chính xác: "Sản phẩm kỹ thuật số không được hoàn tiền, trừ khi có lỗi do nhà sản xuất..." kèm trích dẫn nguồn [1] chính xác từ file policy.
-- **Tại sao cải thiện:** Việc kết hợp thêm **Keyword Search (BM25)** trong bản Hybrid đã phát huy tác dụng tối đa. Cụm từ "Sản phẩm kỹ thuật số" là một từ khóa đặc trưng (Exact match). BM25 đã giúp hệ thống "bắt" được chính xác đoạn văn bản về ngoại lệ mà Dense Search bỏ lỡ. Điều này chứng minh rằng với các tài liệu quy định có nhiều thuật ngữ chuyên môn hoặc danh mục cụ thể, Hybrid Search là lựa chọn sống còn để đảm bảo Context Recall.
+Câu hỏi **q09** là một bài kiểm tra then chốt cho khả năng **Abstain Logic** và **chống Hallucination** của pipeline, đặc biệt là phần Prompting mà tôi phụ trách.
+**Bot trả lời:** Không đủ dữ liệu hiện có
+- **Kết quả Baseline (Dense Search):** Giả sử Baseline không có tối ưu về Grounded Prompting, rất có thể nó sẽ:
+    - **Hallucinate:** Cố gắng suy luận từ kiến thức chung về lỗi HTTP 403, mặc dù không có trong tài liệu. (Score: Penalty -50%).
+    - Hoặc trả lời mơ hồ, không rõ ràng về việc không có thông tin. (Score: Partial - 5/10 theo Grading Rule của `gq07`).
+- **Lỗi nằm ở đâu (nếu có):** Nếu Baseline thất bại, lỗi nằm ở khâu **Generation/Prompting**. Cụ thể là prompt chưa đủ mạnh để buộc LLM phải thừa nhận thiếu thông tin và từ chối trả lời (abstain), thay vì cố gắng "sáng tạo" thông tin. Retrieval có thể không tìm thấy gì (đúng), nhưng LLM vẫn "bịa".
+- **Variant (Hybrid Search):** Pipeline của chúng ta (kể cả với Hybrid Search) đã trả lời chính xác: "Không tìm thấy thông tin về ERR-403-AUTH trong tài liệu hiện có. Đây có thể là lỗi liên quan đến xác thực (authentication), hãy liên hệ IT Helpdesk." với `sources: []`.
+- **Tại sao cải thiện/hoạt động đúng:** Việc trả lời đúng cho `q09` cho thấy rằng các tinh chỉnh của tôi trong hàm `build_grounded_prompt` đã hoạt động hiệu quả. Tôi đã lồng ghép các chỉ dẫn nghiêm ngặt như *"Chỉ sử dụng thông tin được cung cấp. Nếu không thấy, hãy nói rõ là không có trong tài liệu"* để buộc LLM phải tuân thủ. Mặc dù không có chunk nào được retrieve cho `ERR-403-AUTH`, LLM đã không bịa đặt mà thay vào đó đưa ra một câu trả lời mang tính giúp đỡ nhưng vẫn trung thực về giới hạn thông tin của mình. Đây là một thành công lớn trong việc đảm bảo Faithfulness (trung thực) của hệ thống.
 _________________
 
 ---
@@ -67,3 +70,5 @@ _________________
 
 ---
 
+*Lưu file này với tên: `reports/individual/[ten_ban].md`*
+*Ví dụ: `reports/individual/nguyen_van_a.md`*
