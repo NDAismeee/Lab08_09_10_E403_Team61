@@ -318,6 +318,11 @@ def build_index(docs_dir: Path = DOCS_DIR, db_dir: Path = CHROMA_DB_DIR) -> None
     db_dir.mkdir(parents=True, exist_ok=True)
 
     client = chromadb.PersistentClient(path=str(db_dir))
+    # Recreate collection để tránh lỗi lệch dimension khi đổi embedding provider.
+    try:
+        client.delete_collection(COLLECTION_NAME)
+    except Exception:
+        pass
     collection = client.get_or_create_collection(
         name=COLLECTION_NAME,
         metadata={"hnsw:space": "cosine"},
