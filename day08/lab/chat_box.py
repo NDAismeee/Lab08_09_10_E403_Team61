@@ -194,6 +194,22 @@ def main() -> None:
         print("\nAssistant:")
         print(result["answer"])
 
+        print("\nUsed chunks:")
+        for i, chunk in enumerate(result.get("chunks", []), 1):
+            meta = chunk.get("metadata", {})
+            source = meta.get("source", "unknown")
+            section = meta.get("section", "")
+            score = chunk.get("score", 0)
+            preview = (chunk.get("text", "") or "")[:180].replace("\n", " ")
+
+            header = f"  [{i}] {source}"
+            if section:
+                header += f" | {section}"
+            header += f" | score={score:.2f}"
+
+            print(header)
+            print(f"      {preview}...")
+
         print("\nSources:")
         for i, s in enumerate(result["sources"], 1):
             print(f"  [{i}] {s}")
