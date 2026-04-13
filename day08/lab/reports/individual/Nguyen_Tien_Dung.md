@@ -1,7 +1,7 @@
 # Báo Cáo Cá Nhân — Lab Day 08: RAG Pipeline
 
 **Họ và tên:** Nguyễn Tiến Dũng
-**Vai trò trong nhóm:** Retrieval Owner 
+**Vai trò trong nhóm:** Retrieval Owner (Call LLM + grounded prompt, tinh chỉnh prompt)
 **Ngày nộp:** 13/04/2026
 **Độ dài yêu cầu:** 500–800 từ
 
