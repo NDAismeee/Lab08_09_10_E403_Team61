@@ -485,12 +485,4 @@ if __name__ == "__main__":
     inspect_metadata_coverage()
 
     print("\nSprint 1 setup hoàn thành!")
-<<<<<<< HEAD
-    print("Việc cần làm:")
-    print("  1. Implement get_embedding() - chọn OpenAI hoặc Sentence Transformers")
-    print("  2. Implement phần TODO trong build_index()")
-    print("  3. Chạy build_index() và kiểm tra với list_chunks()")
-    print("  4. Nếu chunking chưa tốt: cải thiện _split_by_size() để split theo paragraph")
-=======
     print("Bạn có thể chuyển sang Sprint 2 (retrieve + grounded answer).")
->>>>>>> 64497ddb5a924cb54c7ab445dce705013d4a1a86

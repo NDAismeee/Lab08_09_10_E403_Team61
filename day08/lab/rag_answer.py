@@ -24,6 +24,8 @@ Definition of Done Sprint 3:
 import os
 from typing import List, Dict, Any, Optional, Tuple
 from dotenv import load_dotenv
+import json
+from functools import lru_cache
 
 
 load_dotenv()
@@ -36,6 +38,30 @@ TOP_K_SEARCH = 10    # Số chunk lấy từ vector store trước rerank (searc
 TOP_K_SELECT = 3     # Số chunk gửi vào prompt sau rerank/select (top-3 sweet spot)
 
 LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o-mini")
+
+RERANK_MODEL_NAME = os.getenv(
+    "RERANK_MODEL_NAME",
+    "cross-encoder/ms-marco-MiniLM-L-6-v2"
+)
+RERANK_DEVICE = os.getenv("RERANK_DEVICE", "cpu")
+
+
+@lru_cache(maxsize=1)
+def _get_rerank_model() -> Any:
+    try:
+        from sentence_transformers import CrossEncoder
+    except ModuleNotFoundError as e:
+        raise ModuleNotFoundError(
+            "sentence-transformers is required for rerank. "
+            "Install it by uncommenting it in requirements.txt and running: "
+            "pip install -r requirements.txt"
+        ) from e
+
+    return CrossEncoder(
+        RERANK_MODEL_NAME,
+        device=RERANK_DEVICE,
+        max_length=512,
+    )
 
 
 # =============================================================================
@@ -79,6 +105,7 @@ def retrieve_dense(query: str, top_k: int = TOP_K_SEARCH) -> List[Dict[str, Any]
     """
     import chromadb
     from index import get_embedding, CHROMA_DB_DIR
+<<<<<<< HEAD
     client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
     collection = client.get_collection("rag_lab")
 
@@ -86,11 +113,28 @@ def retrieve_dense(query: str, top_k: int = TOP_K_SEARCH) -> List[Dict[str, Any]
     query_embedding = get_embedding(query)
 
     # Query ChromaDB với embedding đó
+=======
+
+    try:
+        client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
+        collection = client.get_collection("rag_lab")
+    except Exception as e:
+        print(f"[retrieve_dense] Error loading ChromaDB: {e}. Please ensure index.py was run.")
+        return []
+
+    try:
+        query_embedding = get_embedding(query)
+    except NotImplementedError:
+        print("[retrieve_dense] get_embedding() is not implemented in index.py yet!")
+        return []
+        
+>>>>>>> 64497ddb5a924cb54c7ab445dce705013d4a1a86
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=top_k,
         include=["documents", "metadatas", "distances"]
     )
+<<<<<<< HEAD
     # Trả về kết quả kèm score
     chunks = []
     for i, doc in enumerate(results["documents"][0]):
@@ -106,6 +150,29 @@ def retrieve_dense(query: str, top_k: int = TOP_K_SEARCH) -> List[Dict[str, Any]
     #     "TODO Sprint 2: Implement retrieve_dense().\n"
     #     "Tham khảo comment trong hàm để biết cách query ChromaDB."
     # )
+=======
+    
+    chunks = []
+    
+    # ChromaDB returns a list of lists since we can query multiple vectors at once.
+    # We passed exactly 1 query, so we access index [0].
+    if not results["documents"] or not results["documents"][0]:
+        return []
+        
+    docs = results["documents"][0]
+    metas = results["metadatas"][0]
+    dists = results["distances"][0]
+    
+    for doc, meta, dist in zip(docs, metas, dists):
+        score = 1.0 - dist if dist is not None else 0.0
+        chunks.append({
+            "text": doc,
+            "metadata": meta,
+            "score": float(score)
+        })
+        
+    return chunks
+>>>>>>> 64497ddb5a924cb54c7ab445dce705013d4a1a86
 
 
 # =============================================================================
@@ -135,6 +202,7 @@ def retrieve_sparse(query: str, top_k: int = TOP_K_SEARCH) -> List[Dict[str, Any
         scores = bm25.get_scores(tokenized_query)
         top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
     """
+<<<<<<< HEAD
     # Cài rank_bm25
     from rank_bm25 import BM25Okapi
     from index import CHROMA_DB_DIR
@@ -169,6 +237,50 @@ def retrieve_sparse(query: str, top_k: int = TOP_K_SEARCH) -> List[Dict[str, Any
     # Tạm thời return empty list
     # print("[retrieve_sparse] Chưa implement — Sprint 3")
     # return []
+=======
+    import chromadb
+    from rank_bm25 import BM25Okapi
+    from index import CHROMA_DB_DIR
+    
+    try:
+        client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
+        collection = client.get_collection("rag_lab")
+        all_data = collection.get(include=["documents", "metadatas"])
+    except Exception as e:
+        print(f"[retrieve_sparse] Lỗi khi load ChromaDB: {e}. Vui lòng đảm bảo index.py đã chạy thành công.")
+        return []
+
+    if not all_data or not all_data.get("documents"):
+        return []
+
+    docs = all_data["documents"]
+    metas = all_data["metadatas"]
+
+    # Tokenize corpus (tách từ cơ bản)
+    tokenized_corpus = [doc.lower().split() for doc in docs]
+    
+    # Khởi tạo mô hình BM25
+    bm25 = BM25Okapi(tokenized_corpus)
+    
+    # Tokenize query và tính điểm
+    tokenized_query = query.lower().split()
+    scores = bm25.get_scores(tokenized_query)
+
+    # Lấy ra các index đã được sort theo score (giảm dần)
+    top_indices = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:top_k]
+
+    chunks = []
+    for idx in top_indices:
+        score = scores[idx]
+        if score > 0:  # Chỉ lấy các chunk trúng từ khóa
+            chunks.append({
+                "text": docs[idx],
+                "metadata": metas[idx],
+                "score": float(score)
+            })
+
+    return chunks
+>>>>>>> 64497ddb5a924cb54c7ab445dce705013d4a1a86
 
 
 # =============================================================================
@@ -204,6 +316,7 @@ def retrieve_hybrid(
     - Corpus có cả câu tự nhiên VÀ tên riêng, mã lỗi, điều khoản
     - Query như "Approval Matrix" khi doc đổi tên thành "Access Control SOP"
     """
+<<<<<<< HEAD
     # Chạy retrieve_dense() → dense_results
     retrieve_dense_results = retrieve_dense(query, top_k)
 
@@ -237,6 +350,41 @@ def retrieve_hybrid(
     # Tạm thời fallback về dense
     # print("[retrieve_hybrid] Chưa implement RRF — fallback về dense")
     # return retrieve_dense(query, top_k)
+=======
+    # 1. & 2. Lấy kết quả từ Dense và Sparse (nên lấy đủ lớn để giao thoa RRF hiệu quả)
+    pool_size = max(60, top_k * 2)
+    dense_results = retrieve_dense(query, top_k=pool_size)
+    sparse_results = retrieve_sparse(query, top_k=pool_size)
+
+    rrf_map = {}
+
+    # 3. Tính điểm RRF từ Dense
+    for rank, chunk in enumerate(dense_results):
+        text = chunk["text"]
+        if text not in rrf_map:
+            rrf_map[text] = {"chunk": chunk.copy(), "score": 0.0}
+        # Lưu ý: rank bắt đầu từ 0, nên vị trí (rank thực tế) = rank + 1
+        rrf_map[text]["score"] += dense_weight * (1.0 / (60 + rank + 1))
+
+    # Tính điểm RRF từ Sparse
+    for rank, chunk in enumerate(sparse_results):
+        text = chunk["text"]
+        if text not in rrf_map:
+            rrf_map[text] = {"chunk": chunk.copy(), "score": 0.0}
+        rrf_map[text]["score"] += sparse_weight * (1.0 / (60 + rank + 1))
+
+    # 4. Sort theo RRF score giảm dần
+    ranked_items = sorted(rrf_map.values(), key=lambda x: x["score"], reverse=True)
+
+    # Format output: trả về top_k và ghi đè score cũ bằng score RRF
+    final_chunks = []
+    for item in ranked_items[:top_k]:
+        c = item["chunk"]
+        c["score"] = item["score"]
+        final_chunks.append(c)
+
+    return final_chunks
+>>>>>>> 64497ddb5a924cb54c7ab445dce705013d4a1a86
 
 
 # =============================================================================
@@ -252,31 +400,63 @@ def rerank(
     """
     Rerank các candidate chunks bằng cross-encoder.
 
-    Cross-encoder: chấm lại "chunk nào thực sự trả lời câu hỏi này?"
-    MMR (Maximal Marginal Relevance): giữ relevance nhưng giảm trùng lặp
+    Args:
+        query: câu hỏi người dùng
+        candidates: danh sách chunk retrieve ban đầu
+        top_k: số chunk tốt nhất giữ lại
 
-    Funnel logic (từ slide):
-      Search rộng (top-20) → Rerank (top-6) → Select (top-3)
-
-    TODO Sprint 3 (nếu chọn rerank):
-    Option A — Cross-encoder:
-        from sentence_transformers import CrossEncoder
-        model = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
-        pairs = [[query, chunk["text"]] for chunk in candidates]
-        scores = model.predict(pairs)
-        ranked = sorted(zip(candidates, scores), key=lambda x: x[1], reverse=True)
-        return [chunk for chunk, _ in ranked[:top_k]]
-
-    Option B — Rerank bằng LLM (đơn giản hơn nhưng tốn token):
-        Gửi list chunks cho LLM, yêu cầu chọn top_k relevant nhất
-
-    Khi nào dùng rerank:
-    - Dense/hybrid trả về nhiều chunk nhưng có noise
-    - Muốn chắc chắn chỉ 3-5 chunk tốt nhất vào prompt
+    Returns:
+        List[Dict[str, Any]]: top_k chunks đã được rerank.
+        Mỗi chunk giữ nguyên cấu trúc cũ và được bổ sung:
+          - "rerank_score": điểm cross-encoder
     """
-    # TODO Sprint 3: Implement rerank
-    # Tạm thời trả về top_k đầu tiên (không rerank)
-    return candidates[:top_k]
+    if not candidates or top_k <= 0:
+        return []
+
+    try:
+        model = _get_rerank_model()
+
+        # Giới hạn top_k không vượt quá số lượng candidates thực tế
+        top_k = min(top_k, len(candidates))
+
+        # Chuẩn hóa text đầu vào cho reranker
+        prepared_candidates = []
+        pairs = []
+
+        for chunk in candidates:
+            text = str(chunk.get("text", "")).strip()
+            # Cắt mềm để giảm tải CPU; cross-encoder vẫn sẽ tokenize/truncate tiếp
+            if len(text) > 2000:
+                text = text[:2000]
+
+            prepared_candidates.append(chunk)
+            pairs.append([query.strip(), text])
+
+        if not pairs:
+            return candidates[:top_k]
+
+        scores = model.predict(
+            pairs,
+            batch_size=8,
+            show_progress_bar=False,
+        )
+
+        reranked = []
+        for chunk, score in zip(prepared_candidates, scores):
+            new_chunk = chunk.copy()
+            new_chunk["rerank_score"] = float(score)
+            reranked.append(new_chunk)
+
+        reranked.sort(
+            key=lambda x: x.get("rerank_score", float("-inf")),
+            reverse=True,
+        )
+
+        return reranked[:top_k]
+
+    except Exception as e:
+        print(f"[rerank] CrossEncoder failed, fallback to first {top_k} candidates: {e}")
+        return candidates[:top_k]
 
 
 # =============================================================================
@@ -288,30 +468,124 @@ def transform_query(query: str, strategy: str = "expansion") -> List[str]:
     Biến đổi query để tăng recall.
 
     Strategies:
-      - "expansion": Thêm từ đồng nghĩa, alias, tên cũ
-      - "decomposition": Tách query phức tạp thành 2-3 sub-queries
-      - "hyde": Sinh câu trả lời giả (hypothetical document) để embed thay query
+      - "expansion": sinh 2-3 cách diễn đạt khác / alias / từ khóa liên quan
+      - "decomposition": tách câu hỏi phức tạp thành 2-3 sub-queries
+      - "hyde": sinh một đoạn hypothetical answer ngắn để dùng như query mở rộng
 
-    TODO Sprint 3 (nếu chọn query transformation):
-    Gọi LLM với prompt phù hợp với từng strategy.
-
-    Ví dụ expansion prompt:
-        "Given the query: '{query}'
-         Generate 2-3 alternative phrasings or related terms in Vietnamese.
-         Output as JSON array of strings."
-
-    Ví dụ decomposition:
-        "Break down this complex query into 2-3 simpler sub-queries: '{query}'
-         Output as JSON array."
-
-    Khi nào dùng:
-    - Expansion: query dùng alias/tên cũ (ví dụ: "Approval Matrix" → "Access Control SOP")
-    - Decomposition: query hỏi nhiều thứ một lúc
-    - HyDE: query mơ hồ, search theo nghĩa không hiệu quả
+    Returns:
+        List[str]: danh sách query dùng cho retrieval.
+                   Luôn bao gồm query gốc ở vị trí đầu tiên.
     """
-    # TODO Sprint 3: Implement query transformation
-    # Tạm thời trả về query gốc
-    return [query]
+    strategy = strategy.lower().strip()
+    if strategy not in {"expansion", "decomposition", "hyde"}:
+        raise ValueError(
+            f"strategy không hợp lệ: {strategy}. "
+            f"Chọn một trong: expansion, decomposition, hyde"
+        )
+
+    llm_provider = os.getenv("LLM_PROVIDER", "openai").lower().strip()
+
+    if strategy == "expansion":
+        prompt = f"""
+You are helping improve retrieval recall for a RAG system.
+
+Given the user query below, generate 2 to 3 alternative phrasings or closely related search queries.
+Rules:
+- Preserve the original meaning.
+- Include aliases, synonyms, old names, or likely terminology variations if helpful.
+- Keep each query short and retrieval-friendly.
+- Respond in the same language as the original query when possible.
+- Return ONLY a JSON array of strings, no explanation.
+
+Query: {query}
+""".strip()
+
+    elif strategy == "decomposition":
+        prompt = f"""
+You are helping improve retrieval recall for a RAG system.
+
+Break the following complex user query into 2 to 3 simpler sub-queries.
+Rules:
+- Each sub-query should target one specific information need.
+- Keep them short and retrieval-friendly.
+- Do not invent facts not implied by the original question.
+- Respond in the same language as the original query when possible.
+- Return ONLY a JSON array of strings, no explanation.
+
+Query: {query}
+""".strip()
+
+    else:  # hyde
+        prompt = f"""
+You are helping improve retrieval recall for a RAG system.
+
+Write one short hypothetical answer passage that is likely to appear in a relevant document for the query below.
+Rules:
+- 2 to 4 sentences only.
+- Stay generic and plausible.
+- Do not mention that this is hypothetical.
+- Respond in the same language as the original query when possible.
+- Return ONLY a JSON array with exactly 1 string element.
+
+Query: {query}
+""".strip()
+
+    try:
+        if llm_provider == "openai":
+            from openai import OpenAI
+
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            response = client.chat.completions.create(
+                model=LLM_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0,
+                max_tokens=256,
+            )
+            raw_output = response.choices[0].message.content.strip()
+
+        elif llm_provider == "gemini":
+            import google.generativeai as genai
+
+            genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
+            raw_output = response.text.strip()
+
+        else:
+            raise ValueError(
+                f"LLM_PROVIDER không hợp lệ: {llm_provider}. "
+                f"Dùng 'openai' hoặc 'gemini'."
+            )
+
+        # Parse JSON array
+        outputs = json.loads(raw_output)
+
+        if not isinstance(outputs, list):
+            raise ValueError("LLM output không phải JSON array.")
+
+        cleaned = []
+        seen = set()
+
+        # Luôn giữ query gốc đầu tiên
+        for item in [query] + outputs:
+            if not isinstance(item, str):
+                continue
+            text = item.strip()
+            if not text:
+                continue
+            key = text.lower()
+            if key not in seen:
+                seen.add(key)
+                cleaned.append(text)
+
+        # Giới hạn số lượng cho gọn
+        if strategy in {"expansion", "decomposition"}:
+            return cleaned[:4]   # query gốc + tối đa 3 biến thể
+        return cleaned[:2]       # query gốc + 1 HyDE passage
+
+    except Exception as e:
+        print(f"[transform_query] LLM transform failed ({strategy}): {e}")
+        return [query]
 
 
 # =============================================================================
@@ -578,6 +852,11 @@ def compare_retrieval_strategies(query: str) -> None:
 # =============================================================================
 
 if __name__ == "__main__":
+    import sys
+
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+
     print("=" * 60)
     print("Sprint 2 + 3: RAG Answer Pipeline")
     print("=" * 60)
