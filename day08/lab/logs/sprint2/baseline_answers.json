@@ -2,92 +2,95 @@
   {
     "id": "q01",
     "question": "SLA xử lý ticket P1 là bao lâu?",
-    "answer": "SLA xử lý ticket P1 là 4 giờ để khắc phục và 15 phút để phản hồi ban đầu kể từ khi ticket được tạo [1].",
+    "answer": "SLA xử lý ticket P1 bao gồm:\n- Phản hồi ban đầu: 15 phút kể từ khi ticket được tạo.\n- Xử lý và khắc phục: 4 giờ [1].",
     "sources": [
-      "support/sla-p1-2026.pdf",
-      "it/access-control-sop.md"
+      "policy/refund-v4.pdf",
+      "support/sla-p1-2026.pdf"
     ],
     "retrieval_mode": "dense",
     "use_rerank": false,
-    "timestamp": "2026-04-13T15:47:58"
+    "timestamp": "2026-04-13T17:19:52"
   },
   {
     "id": "q02",
     "question": "Khách hàng có thể yêu cầu hoàn tiền trong bao nhiêu ngày?",
     "answer": "Khách hàng có thể yêu cầu hoàn tiền trong vòng 7 ngày làm việc kể từ thời điểm xác nhận đơn hàng [1].",
     "sources": [
-      "policy/refund-v4.pdf",
-      "hr/leave-policy-2026.pdf"
+      "policy/refund-v4.pdf"
     ],
     "retrieval_mode": "dense",
     "use_rerank": false,
-    "timestamp": "2026-04-13T15:48:01"
+    "timestamp": "2026-04-13T17:19:56"
   },
   {
     "id": "q03",
     "question": "Ai phải phê duyệt để cấp quyền Level 3?",
-    "answer": "Để cấp quyền Level 3, cần có sự phê duyệt của Line Manager, IT Admin và IT Security [2].",
+    "answer": "Phê duyệt để cấp quyền Level 3 bao gồm: Line Manager + IT Admin + IT Security [1].",
     "sources": [
+      "hr/leave-policy-2026.pdf",
       "it/access-control-sop.md"
     ],
     "retrieval_mode": "dense",
     "use_rerank": false,
-    "timestamp": "2026-04-13T15:48:03"
+    "timestamp": "2026-04-13T17:19:59"
   },
   {
     "id": "q04",
     "question": "Sản phẩm kỹ thuật số có được hoàn tiền không?",
-    "answer": "Không đủ dữ liệu trong tài liệu hiện có để trả lời câu hỏi này.",
-    "sources": [],
+    "answer": "Không tìm thấy thông tin về 'Sản phẩm kỹ thuật số có được hoàn tiền không?' trong tài liệu hiện có.",
+    "sources": [
+      "policy/refund-v4.pdf"
+    ],
     "retrieval_mode": "dense",
     "use_rerank": false,
-    "timestamp": "2026-04-13T15:48:03"
+    "timestamp": "2026-04-13T17:20:02"
   },
   {
     "id": "q05",
     "question": "Tài khoản bị khóa sau bao nhiêu lần đăng nhập sai?",
     "answer": "Tài khoản bị khóa sau 5 lần đăng nhập sai liên tiếp. Để mở khóa, liên hệ IT Helpdesk hoặc tự reset qua portal SSO [1].",
     "sources": [
-      "policy/refund-v4.pdf",
+      "it/access-control-sop.md",
       "support/helpdesk-faq.md"
     ],
     "retrieval_mode": "dense",
     "use_rerank": false,
-    "timestamp": "2026-04-13T15:48:07"
+    "timestamp": "2026-04-13T17:20:04"
   },
   {
     "id": "q06",
     "question": "Escalation trong sự cố P1 diễn ra như thế nào?",
-    "answer": "Escalation trong sự cố P1 diễn ra tự động lên Senior Engineer nếu không có phản hồi trong 10 phút kể từ khi ticket được tạo [2].",
+    "answer": "Không tìm thấy thông tin về 'Escalation trong sự cố P1 diễn ra như thế nào?' trong tài liệu hiện có.",
     "sources": [
+      "it/access-control-sop.md",
       "support/sla-p1-2026.pdf"
     ],
     "retrieval_mode": "dense",
     "use_rerank": false,
-    "timestamp": "2026-04-13T15:48:09"
+    "timestamp": "2026-04-13T17:20:07"
   },
   {
     "id": "q07",
     "question": "Approval Matrix để cấp quyền hệ thống là tài liệu nào?",
-    "answer": "Approval Matrix để cấp quyền hệ thống là tài liệu quy định quy trình cấp phép truy cập vào các hệ thống nội bộ của công ty [1].",
+    "answer": "Không tìm thấy thông tin về 'Approval Matrix để cấp quyền hệ thống là tài liệu nào?' trong tài liệu hiện có.",
     "sources": [
-      "policy/refund-v4.pdf",
       "it/access-control-sop.md"
     ],
     "retrieval_mode": "dense",
     "use_rerank": false,
-    "timestamp": "2026-04-13T15:48:10"
+    "timestamp": "2026-04-13T17:20:09"
   },
   {
     "id": "q08",
     "question": "Nhân viên được làm remote tối đa mấy ngày mỗi tuần?",
-    "answer": "Nhân viên được làm remote tối đa 2 ngày mỗi tuần sau khi hoàn thành probation period, và lịch remote phải được Team Lead phê duyệt qua HR Portal [1].",
+    "answer": "Nhân viên sau probation period có thể làm remote tối đa 2 ngày/tuần [1].",
     "sources": [
-      "hr/leave-policy-2026.pdf"
+      "hr/leave-policy-2026.pdf",
+      "it/access-control-sop.md"
     ],
     "retrieval_mode": "dense",
     "use_rerank": false,
-    "timestamp": "2026-04-13T15:48:13"
+    "timestamp": "2026-04-13T17:20:12"
   },
   {
     "id": "q09",
@@ -96,19 +99,17 @@
     "sources": [],
     "retrieval_mode": "dense",
     "use_rerank": false,
-    "timestamp": "2026-04-13T15:48:13"
+    "timestamp": "2026-04-13T17:20:13"
   },
   {
     "id": "q10",
     "question": "Nếu cần hoàn tiền khẩn cấp cho khách hàng VIP, quy trình có khác không?",
-    "answer": "Không có thông tin nào trong ngữ cảnh về quy trình hoàn tiền khẩn cấp cho khách hàng VIP. Tôi không biết.",
+    "answer": "Không tìm thấy thông tin về 'Nếu cần hoàn tiền khẩn cấp cho khách hàng VIP, quy trình có khác không?' trong tài liệu hiện có.",
     "sources": [
-      "policy/refund-v4.pdf",
-      "hr/leave-policy-2026.pdf",
-      "it/access-control-sop.md"
+      "policy/refund-v4.pdf"
     ],
     "retrieval_mode": "dense",
     "use_rerank": false,
-    "timestamp": "2026-04-13T15:48:15"
+    "timestamp": "2026-04-13T17:20:15"
   }
 ]
