@@ -33,6 +33,12 @@
 Ở Sprint 3, policy_tool phụ thuộc vào hàm dispatch_tool của file mcp_server.py nên nếu không dùng llm sẽ dựa vào hàm dispatch_tool để chờ đáp án. Và các file của tôi khi chạy Agent thì chúng đều phụ thuộc vào file retrieval.py để nhận text dù hoạt động độc lập với nhau
 
 **Bằng chứng (commit hash, file có comment tên bạn, v.v.):**
+<img width="1708" height="848" alt="image" src="https://github.com/user-attachments/assets/b1894bb4-dc4a-4677-aad2-d824ecb40f09" />
+<img width="1548" height="822" alt="image" src="https://github.com/user-attachments/assets/419b7ccb-0086-4eaf-b600-a4a61c0a9738" />
+commit 7255c423929a1dae85c83e19f6ed7df6a0c6a219 (HEAD -> main)
+Author: Nguyen Tien Dung <####@gmail.com>
+Date:   Tue Apr 14 15:34:12 2026 +0700
+
 
 _________________
 
