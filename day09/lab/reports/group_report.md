@@ -4,10 +4,11 @@
 **Thành viên:**
 | Tên | Vai trò | Email |
 |-----|---------|-------|
-| Nguyễn Văn A | Supervisor Owner | a.nv@example.com |
-| Trần Thị B | Worker Owner | b.tt@example.com |
-| Lê Văn C | MCP Owner | c.lv@example.com |
-| Trần Long Hải | Trace & Docs Owner | hai.tl@example.com |
+| Đỗ Minh Hiếu | Supervisor Owner | [Dohieunt1102@gmail.com] |
+| Khương Quang Vinh | Worker Owner | [vinhkhuongquang@gmail.com] |
+| Nguyễn Tiến Dũng | MCP Owner | [ntdung2005@gmail.com] |
+| Nguyễn Đức Anh | Trace & Docs Owner | [ndaismeee@gmail.com] |
+| Trần Long Hải | Trace & Docs Owner | [longhai7803@gmail.com] |
 
 **Ngày nộp:** 14/04/2026  
 **Repo:** https://github.com/NDAismeee/Lab08_09_10_E403_Team61  
@@ -17,7 +18,7 @@
 
 ## 1. Kiến trúc nhóm đã xây dựng (200–250 từ)
 
-Hệ thống trợ lý CS + IT Helpdesk của nhóm E403_Team61 được tái cấu trúc từ mô hình Single-Agent (Day 08) sang kiến trúc **Supervisor-Worker** hiện đại, sử dụng thư viện LangGraph để quản lý luồng trạng thái (State Management). Kiến trúc này được chọn nhằm giải quyết bài toán nợ kỹ thuật (Technical Debt) khi các yêu cầu về nghiệp vụ ngày càng trở nên phức tạp và chồng chéo.
+Hệ thống trợ lý CS + IT Helpdesk của nhóm E403_Team61 được tái cấu trúc từ mô hình Single-Agent (Day 08) sang kiến trúc **Supervisor-Worker** hiện đại. Sử dụng kiến trúc trong hàm `build_graph()` nhằm giải quyết bài toán khi các yêu cầu về nghiệp vụ ngày càng trở nên phức tạp và chồng chéo.
 
 **Hệ thống bao gồm các thành phần chủ chốt:**
 - **Supervisor Node (`graph.py`)**: Đóng vai trò là "bộ não" điều phối. Nó không trực tiếp giải quyết vấn đề mà phân tích ý định của người dùng (Intent Classification) để dán nhãn nhiệm vụ và route sang các worker phù hợp.
@@ -78,11 +79,11 @@ Nhóm nhận thấy với những câu hỏi mang tính chất "Socialize" (như
 ## 4. Phân công và Đánh giá Nhóm (150–200 từ)
 
 **Phân công thực tế của nhóm 5 người:**
-- **Nguyễn Văn A (Nhóm trưởng)**: Thiết kế Graph core, State management và logic Supervisor.
-- **Trần Thị B**: Xây dựng kho tri thức ChromaDB và logic Retrieval Worker.
-- **Lê Văn C**: Implement Policy Tool Worker và Synthesis Node.
-- **Phạm Văn D**: Xây dựng MCP Server và tích hợp các công cụ hỗ trợ.
-- **Trần Long Hải**: Phụ trách Sprint 4: Viết script đánh giá, phân tích traces và hoàn thiện toàn bộ hệ thống tài liệu.
+- **Đỗ Minh Hiếu**: Thiết kế Graph core, State management và logic Supervisor.
+- **Khương Quang Vinh**: Xây dựng kho tri thức ChromaDB và logic Retrieval Worker.
+- **Nguyễn Tiến Dũng**: Implement Policy Tool Worker và Synthesis Node.
+- **Nguyễn Đức Anh**: Xây dựng MCP Server và tích hợp các công cụ hỗ trợ.
+- **Trần Long Hải**: Trace & Docs & Report
 
 **Đánh giá:**
 Nhóm làm việc rất hiệu quả nhờ việc thống nhất chặt chẽ **Worker Contracts** ngay từ đầu giờ. Điều này giúp mỗi thành viên có thể code độc lập mà không cần chờ đợi nhau. Tuy nhiên, một điểm hạn chế nhỏ là khi tích hợp vào cuối buổi, nhóm gặp một số xung đột về phiên bản thư viện giữa các máy (đặc biệt là vấn đề Encoding trên Windows đã được bạn Hải xử lý kịp thời).
