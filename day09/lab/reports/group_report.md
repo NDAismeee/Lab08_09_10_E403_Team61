@@ -6,7 +6,7 @@
 |-----|---------|-------|
 | Đỗ Minh Hiếu | Supervisor Owner | [Dohieunt1102@gmail.com] |
 | Khương Quang Vinh | Worker Owner | [vinhkhuongquang@gmail.com] |
-| Nguyễn Tiến Dũng | MCP Owner | [ntdung2005@gmail.com] |
+| Nguyễn Tiến Dũng | MCP Owner | dungnguyentien138@gmail.com |
 | Nguyễn Đức Anh | Trace & Docs Owner | [ndaismeee@gmail.com] |
 | Trần Long Hải | Trace & Docs Owner | [longhai7803@gmail.com] |
 
