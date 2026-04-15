@@ -1,7 +1,7 @@
 # Kiến trúc pipeline — Lab Day 10
 
 **Nhóm:** Team 61 (E403)
-**Cập nhật:** 2024-05-23
+**Cập nhật:** 15-04-2026
 
 ---
 
