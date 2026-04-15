@@ -17,11 +17,6 @@
 
 | Cột | Kiểu | Bắt buộc | Ghi chú |
 |-----|------|----------|---------|
-| chunk_id | string | Có | … |
-| doc_id | string | Có | … |
-| chunk_text | string | Có | … |
-| effective_date | date | Có | … |
-| exported_at | datetime | Có | … |
 | chunk_id | string | Có | Hash MD5 của nội dung text |
 | doc_id | string | Có | Phải nằm trong allowlist của CS/IT |
 | chunk_text | string | Có | Nội dung đã được xử lý whitespace |
