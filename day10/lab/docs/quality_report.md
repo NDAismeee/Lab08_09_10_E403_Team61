@@ -1,6 +1,6 @@
 # Quality report — Lab Day 10 (nhóm)
 
-**run_id:** 2026-04-15T08-27Z  
+**run_id:** inject-bad vs after-fix  
 **Ngày:** 15/04/2026
 
 ---
@@ -18,7 +18,7 @@
 
 ## 2. Before / after retrieval (bắt buộc)
 
-> Evidence: `artifacts/eval/after_inject_bad.csv` (bad run) và `artifacts/eval/clean_run_eval.csv` (clean run).
+> Evidence: `artifacts/eval/eval_after_inject_bad.csv` (bad run) và `artifacts/eval/eval_after_fix.csv` (clean run).
 
 **Câu hỏi then chốt:** refund window (`q_refund_window`)
 
@@ -77,7 +77,7 @@
   - `python etl_pipeline.py run --run-id inject-bad --no-refund-fix --skip-validate`
 - Corruption: giữ lại phiên bản hợp đồng refund 14 ngày (`--no-refund-fix`) và bỏ qua halt validation (`--skip-validate`).
 - Mục tiêu: tạo một trường hợp stale refund window để kiểm tra retrieval `hits_forbidden`.
-- Cách phát hiện: đánh giá retrieval với `eval_retrieval.py` và quan sát `hits_forbidden=yes` cho `q_refund_window` trong file `artifacts/eval/after_inject_bad.csv`.
+- Cách phát hiện: đánh giá retrieval với `eval_retrieval.py` và quan sát `hits_forbidden=yes` cho `q_refund_window` trong file `artifacts/eval/eval_after_inject_bad.csv`.
 
 ---
 
