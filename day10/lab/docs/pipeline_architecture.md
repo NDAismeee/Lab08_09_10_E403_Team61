@@ -43,10 +43,17 @@ Cơ chế đảm bảo tính hội tụ (Idempotency) dựa trên:
 
 ## 4. Liên hệ Day 09
 
-> Pipeline này cung cấp / làm mới corpus cho retrieval trong `day09/lab` như thế nào? (cùng `data/docs/` hay export riêng?)
+Pipeline này đóng vai trò là "Data Guardrail" (rào chắn dữ liệu) cho hệ thống Multi-Agent ở Day 09. Thay vì để Agent truy cập trực tiếp vào các file text thô dễ sai sót, pipeline thực hiện:
+1. **Đồng bộ Vector Database**: Dữ liệu sau khi được làm sạch và kiểm định sẽ được Upsert trực tiếp vào collection ChromaDB mà `retrieval_worker` của Day 09 sử dụng.
+2. **Loại bỏ thông tin nhiễu**: Thông qua các quy tắc Cleaning (như xóa bỏ stale refund 14 days), pipeline đảm bảo Agent không bao giờ truy xuất phải các tri thức cũ/sai lệch, giúp tăng điểm Faithfulness.
+3. **Chuẩn hóa Metadata**: Pipeline ép các trường `source` và `doc_id` về dạng canonical, giúp bước Synthesis ở Day 09 có thể tạo trích dẫn (citation) chính xác và nhất quán.
 
 ---
 
 ## 5. Rủi ro đã biết
 
-- …
+1. **Freshness Lag**: Dữ liệu nguồn từ hệ thống cũ (`policy_export_dirty.csv`) có thể không được cập nhật thời gian thực, dẫn đến vi phạm SLA về độ tươi của dữ liệu (24h) như đã thấy trong báo cáo chất lượng.
+2. **Phụ thuộc API bên thứ ba**: Việc sử dụng OpenAI cho embedding gây rủi ro về chi phí và độ trễ (latency) khi pipeline xử lý số lượng bản ghi lớn.
+3. **Quarantine Over-filtering**: Các quy tắc Expectation quá khắt khe có thể đẩy nhầm các bản ghi hợp lệ vào Quarantine, làm mất đi dữ liệu cần thiết cho Agent trả lời các câu hỏi đặc thù.
+4. **Rủi ro Pruning**: Cơ chế xóa dữ liệu cũ (Prune) dựa trên ID có thể gây mất dữ liệu nếu logic tạo `chunk_id` (MD5 hash) gặp xung đột hoặc bị thay đổi định dạng.
+
