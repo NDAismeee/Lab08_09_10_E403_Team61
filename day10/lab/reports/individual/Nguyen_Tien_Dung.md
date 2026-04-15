@@ -16,7 +16,10 @@
 ## 1. Tôi phụ trách phần nào? (115 từ)
 
 Trong Lab Day 10, tôi đảm nhận vai trò **Monitoring / Docs Owner**. Trách nhiệm chính của tôi bao gồm thiết lập hạ tầng giám sát dữ liệu và quản lý bộ tài liệu vận hành. Tôi trực tiếp quản lý module `monitoring/freshness_check.py` để đảm bảo SLA về độ tươi của dữ liệu và xây dựng 3 tài liệu quan trọng: `pipeline_architecture.md`, `data_contract.md`, và `runbook.md`. 
-Tôi đóng vai trò là điểm kết nối cuối cùng trong pipeline; tôi nhận `run_id` và manifest từ **Member 1 (Pipeline)**, đối chiếu kết quả validation từ **Member 3 (Quality)** và kiểm tra hiệu quả retrieval từ **Member 4 (Embed)** để hoàn thiện file `quality_report.md`. Bằng chứng đóng góp của tôi thể hiện rõ qua các file cấu hình SLA trong `.env` và nội dung chi tiết trong thư mục `docs/`.
+
+Tôi đóng vai trò là điểm kết nối cuối cùng trong pipeline; tôi nhận `run_id` và manifest từ **Member 1 (Pipeline)**, đối chiếu kết quả validation từ **Member 3 (Quality)** và kiểm tra hiệu quả retrieval từ **Member 4 (Embed)** để hoàn thiện file `quality_report.md`. 
+
+Bằng chứng đóng góp của tôi thể hiện rõ qua các file cấu hình SLA trong `.env` và nội dung chi tiết trong thư mục `docs/`.
 
 ---
 
