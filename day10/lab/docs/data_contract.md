@@ -40,5 +40,5 @@
 
 - Source of truth cho refund policy: `data/docs/policy_refund_v4.txt`.
 - Cửa sổ hoàn tiền hợp lệ: 7 ngày (không chấp nhận stale 14 ngày trong cleaned output).
-- Với HR leave policy, chỉ giữ version thỏa mốc hiệu lực sau `2025-01-01`.
+- Với HR leave policy, chỉ giữ version thỏa mốc hiệu lực từ `2026-01-01` (đồng bộ `policy_versioning.hr_leave_min_effective_date`).
 - **Quy tắc chặn xung đột**: Không cho phép cùng 1 `doc_id` có 2 ngày hiệu lực khác nhau trong cùng 1 batch (Expectation E9).
