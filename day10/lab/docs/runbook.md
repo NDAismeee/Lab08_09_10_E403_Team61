@@ -6,14 +6,14 @@
 
 > User / agent thấy gì? (VD: trả lời “14 ngày” thay vì 7 ngày)
 
-> User hoặc Agent phản hồi thông tin lỗi thời (Ví dụ: "Hoàn tiền trong 14 ngày" trong khi quy định mới là 7 ngày).
+User hoặc Agent phản hồi thông tin lỗi thời (Ví dụ: "Hoàn tiền trong 14 ngày" trong khi quy định mới là 7 ngày).
 ---
 
 ## Detection
 
 > Metric nào báo? (freshness, expectation fail, eval `hits_forbidden`)
 
-> Hệ thống báo freshness `FAIL` hoặc kết quả eval có `hits_forbidden=yes`.
+Hệ thống báo freshness `FAIL` hoặc kết quả eval có `hits_forbidden=yes`.
 ---
 
 ## Diagnosis
