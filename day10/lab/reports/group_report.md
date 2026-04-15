@@ -7,7 +7,7 @@
 | ___ | Ingestion / Raw Owner | ___ |
 | ___ | Cleaning & Quality Owner | ___ |
 | ___ | Embed & Idempotency Owner | ___ |
-| ___ | Monitoring / Docs Owner | ___ |
+| Nguyễn Tiến Dũng | Monitoring / Docs Owner | dungnguyentien138@gmail.com |
 
 **Ngày nộp:** ___________  
 **Repo:** ___________  
