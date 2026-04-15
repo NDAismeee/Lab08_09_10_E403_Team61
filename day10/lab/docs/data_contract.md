@@ -22,6 +22,11 @@
 | chunk_text | string | Có | … |
 | effective_date | date | Có | … |
 | exported_at | datetime | Có | … |
+| chunk_id | string | Có | Hash MD5 của nội dung text |
+| doc_id | string | Có | Phải nằm trong allowlist của CS/IT |
+| chunk_text | string | Có | Nội dung đã được xử lý whitespace |
+| effective_date | date | Có | Định dạng ISO YYYY-MM-DD |
+| exported_at | datetime | Có | Thời điểm export từ hệ thống nguồn |
 
 ---
 
@@ -31,15 +36,14 @@
 
 - Record vi phạm schema/allowlist/format được đưa vào `artifacts/quarantine/quarantine_<run-id>.csv`.
 - Record duplicate theo `chunk_text` được giữ bản mới nhất theo `exported_at`, bản cũ chuyển quarantine (không drop im lặng).
-- Record có `doc_id` không nằm trong `allowed_doc_ids` bị quarantine để tránh nhiễm bẩn index.
+- Record có `doc_id` không nằm trong `allowed_doc_ids` bị quarantine ngay từ bước Cleaning.
 - Quy trình approve merge lại: Cleaning/Quality Owner đề xuất fix rule, Pipeline Owner (Người A) rerun và so số liệu trước/sau trong `artifacts/logs` + `artifacts/manifests`.
 
 ---
 
 ## 4. Phiên bản & canonical
 
-> Source of truth cho policy refund: file nào / version nào?
-
 - Source of truth cho refund policy: `data/docs/policy_refund_v4.txt`.
 - Cửa sổ hoàn tiền hợp lệ: 7 ngày (không chấp nhận stale 14 ngày trong cleaned output).
-- Với HR leave policy, chỉ giữ version thỏa mốc hiệu lực theo contract (`hr_leave_min_effective_date`).
+- Với HR leave policy, chỉ giữ version thỏa mốc hiệu lực sau `2025-01-01`.
+- **Quy tắc chặn xung đột**: Không cho phép cùng 1 `doc_id` có 2 ngày hiệu lực khác nhau trong cùng 1 batch (Expectation E9).
