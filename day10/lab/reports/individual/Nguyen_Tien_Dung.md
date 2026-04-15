@@ -19,7 +19,7 @@ Trong Lab Day 10, tôi đảm nhận vai trò **Monitoring / Docs Owner**. Trác
 
 Tôi đóng vai trò là điểm kết nối cuối cùng trong pipeline; tôi nhận `run_id` và manifest từ **Member 1 (Pipeline)**, đối chiếu kết quả validation từ **Member 3 (Quality)** và kiểm tra hiệu quả retrieval từ **Member 4 (Embed)** để hoàn thiện file `quality_report.md`. 
 
-Bằng chứng đóng góp của tôi thể hiện rõ qua các file cấu hình SLA trong `.env` và nội dung chi tiết trong thư mục `docs/`.
+Bằng chứng đóng góp của tôi thể hiện rõ qua nội dung chi tiết trong thư mục `docs/`.
 
 ---
 
